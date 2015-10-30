@@ -1,0 +1,37 @@
+# NOTE: DO NOT USE THIS DIRECTLY it will run but you won't get live code reloads
+# use ./start-dev.sh to start vagrant and syncing
+<%= name %>:
+  build: .
+  command: sh -c 'npm install --unsafe-perm ; npm install -g gulp ; gulp dev'
+  ports:
+    - "<%= port %>:<%= port %>"
+  environment:
+    - LOGSTASH_SERVICE_HOST=logstash # stub these in - available on kubernetes
+    - RABBITMQ_SERVICE_HOST=rabbitmq
+  volumes:
+    - /sync/service:/service #/sync is defined in the vagrant file
+  links:
+    - logstash
+    - rabbitmq
+elasticsearch:
+  image: hharnisc/elasticsearch:v1
+  ports:
+    - "9200:9200"
+logstash:
+  image: hharnisc/logstash:v2
+  command: logstash -f /etc/logstash/conf.d/logstash.conf
+  ports:
+    - "5000:5000"
+  links:
+    - elasticsearch
+kibana:
+  image: hharnisc/kibana:v1
+  ports:
+    - "5601:5601"
+  links:
+    - elasticsearch
+rabbitmq:
+  image: rabbitmq:3-management
+  ports:
+    - "8081:15672"
+    - "5672:5672"

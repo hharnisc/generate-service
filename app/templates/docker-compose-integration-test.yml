@@ -1,0 +1,24 @@
+# NOTE: breaks when the service is already pre-built, make sure you delete all of your containers before running `docker-compose up` with `docker rm -f $(docker ps -a -q)`
+
+<%= name %>:
+  build: .
+  command: npm start -- --port <%= port %>
+  ports:
+    - "<%= port %>:<%= port %>"
+  environment:
+    - RABBITMQ_SERVICE_HOST=rabbitmq
+  links:
+    - rabbitmq
+integration-cop:
+  image: hharnisc/integration-cop
+  command: mocha --compilers js:babel/register
+  volumes:
+    - ./service/integration-test:/integration-test # make the integration tests available to integration-cop
+  working_dir: /integration-test
+  links:
+    - <%= name %> # this makes <%= name %> a reachable hostname
+rabbitmq:
+  image: rabbitmq:3-management
+  ports:
+    - "8081:15672"
+    - "5672:5672"

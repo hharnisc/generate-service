@@ -1,0 +1,37 @@
+# use this compose file to simulate a production environment
+# NOTE: breaks when the service is already pre-built, make sure you delete all of your containers before running `docker-compose up` with `docker rm -f $(docker ps -a -q)`
+
+<%= name %>:
+  build: .
+  command: npm start -- --port <%= port %>
+  environment:
+    - LOGSTASH_SERVICE_HOST=logstash
+    - RABBITMQ_SERVICE_HOST=rabbitmq
+    - NODE_ENV=production
+  ports:
+    - "<%= port %>:<%= port %>"
+  links:
+    - logstash
+    - rabbitmq
+elasticsearch:
+  image: hharnisc/elasticsearch:v1
+  ports:
+    - "9200:9200"
+logstash:
+  image: hharnisc/logstash:v2
+  command: logstash -f /etc/logstash/conf.d/logstash.conf
+  ports:
+    - "5000:5000"
+  links:
+    - elasticsearch
+kibana:
+  image: hharnisc/kibana:v1
+  ports:
+    - "5601:5601"
+  links:
+    - elasticsearch
+rabbitmq:
+  image: rabbitmq:3-management
+  ports:
+    - "8081:15672"
+    - "5672:5672"
