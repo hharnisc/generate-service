@@ -1,7 +1,7 @@
 import BaseService from "rest-methods/server";
 import { logger } from "./logging";
-import { PubSub } from "service-pubsub";
-import { PushWorker } from "service-pushworker";
+import { PubSub } from "service-mq-pubsub";
+import { PushWorker } from "service-mq-pushworker";
 
 export class Service {
   constructor(options={}) {
